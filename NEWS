@@ -4,6 +4,12 @@ CHANGES WITH 257 in spe:
 
         Incompatible changes:
 
+        * The systemd-creds 'cat' verb could previously only read encrypted
+          credentials if they were raw binary data, making it inconsistent
+          with the 'decrypt' verb and and the LoadCredentialEncrypted= service
+          setting, which expect base64-encoded data. This is now fixed,
+          potentially breaking existing setups.
+
         * The --purge switch of systemd-tmpfiles (which was added in v256) has
           been reworked: it will now only apply to tmpfiles.d/ lines marked
           with the new "$" flag. This is an incompatible change, and means any
