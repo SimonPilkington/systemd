@@ -453,9 +453,9 @@ clean_usertest() {
 trap clean_usertest EXIT
 dd if=/dev/urandom of=/tmp/usertest.data bs=4096 count=1
 
-systemd-creds encrypt --user /tmp/usertest.data /tmp/usertest.cred
+runas testuser systemd-creds encrypt --user /tmp/usertest.data /tmp/usertest.cred
 
-systemd-creds decrypt --user /tmp/usertest.cred - | cmp /tmp/usertest.data
+runas testuser systemd-creds decrypt --user /tmp/usertest.cred - | cmp /tmp/usertest.data
 
 # Decryption must fail if it's not done in user context
 (! systemd-creds decrypt /tmp/usertest.cred - )
@@ -468,11 +468,11 @@ systemd-creds encrypt --user --uid=65534 /tmp/usertest.data /tmp/usertest.cred
 (! systemd-creds decrypt --user /tmp/usertest.cred - )
 systemd-creds decrypt --user --uid=65534 /tmp/usertest.cred - | cmp /tmp/usertest.data
 
-systemd-creds encrypt --user /tmp/usertest.data /tmp/usertest.creds --name=mytest
+runas testuser systemd-creds encrypt --user /tmp/usertest.data /tmp/usertest.creds --name=mytest
 
 # Make sure we actually can decode this in user context
-systemctl start user@0.service
-XDG_RUNTIME_DIR=/run/user/0 systemd-run --pipe --user --unit=waldi.service -p LoadCredentialEncrypted=mytest:/tmp/usertest.creds cat /run/user/0/credentials/waldi.service/mytest | cmp /tmp/usertest.data
+systemctl start user@4711.service
+XDG_RUNTIME_DIR=/run/user/4711 runas testuser systemd-run --pipe --user --unit=waldi.service -p LoadCredentialEncrypted=mytest:/tmp/usertest.creds cat /run/user/0/credentials/waldi.service/mytest | cmp /tmp/usertest.data
 
 systemd-analyze log-level info
 
