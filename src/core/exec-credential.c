@@ -1058,6 +1058,7 @@ int exec_setup_credentials(
         if (r < 0 && r != -EEXIST)
                 return r;
 
+        log_info("Attempting fork.");
         if (geteuid() == 0)
                 r = safe_fork("(sd-mkdcreds)", FORK_DEATHSIG_SIGTERM|FORK_WAIT|FORK_NEW_MOUNTNS, NULL);
         else
