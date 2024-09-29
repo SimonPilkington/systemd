@@ -1709,6 +1709,8 @@ int mount_credentials_fs(const char *path, size_t size, bool ro) {
                 if (r >= 0)
                         return r;
         }
+        else
+                log_info("noswap not supported?");
 
         r = mount_nofollow_verbose(
                         LOG_DEBUG,

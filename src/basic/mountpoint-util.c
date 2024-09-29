@@ -796,6 +796,8 @@ int mount_option_supported(const char *fstype, const char *key, const char *valu
         _cleanup_close_ int fd = -EBADF;
         int r;
 
+        log_info("Testing mount option %s for fstype %s.", key, fstype);
+
         /* Checks if the specified file system supports a mount option. Returns > 0 if it supports it, == 0 if
          * it does not. Return -EAGAIN if we can't determine it. And any other error otherwise. */
 
@@ -833,13 +835,16 @@ int mount_option_supported(const char *fstype, const char *key, const char *valu
         else
                 r = fsconfig(fd, FSCONFIG_SET_FLAG, key, NULL, 0);
         if (r < 0) {
-                if (errno == EINVAL)
+                if (errno == EINVAL) {
+                        log_info("Mount option %s doesn't work.", key);
                         return false; /* EINVAL means option not supported. */
+                }
 
                 return log_debug_errno(errno, "Failed to set '%s%s%s' on '%s' superblock context: %m",
                                        key, value ? "=" : "", strempty(value), fstype);
         }
 
+        log_info("Mount option %s works.", key);
         return true; /* works! */
 }
 
