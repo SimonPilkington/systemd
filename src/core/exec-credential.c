@@ -445,15 +445,24 @@ static int maybe_decrypt_and_write_credential(
         assert(data || size == 0);
 
         if (args->encrypted) {
-                r = decrypt_credential_and_warn(
-                                id,
-                                now(CLOCK_REALTIME),
-                                /* tpm2_device= */ NULL,
-                                /* tpm2_signature_path= */ NULL,
-                                getuid(),
-                                &IOVEC_MAKE(data, size),
-                                CREDENTIAL_ANY_SCOPE,
-                                &plaintext);
+                if (geteuid() != 0)
+                        r = ipc_decrypt_credential(
+                                        id,
+                                        now(CLOCK_REALTIME),
+                                        getuid(),
+                                        &IOVEC_MAKE(data, size),
+                                        CREDENTIAL_ANY_SCOPE,
+                                        &plaintext);
+                else
+                        r = decrypt_credential_and_warn(
+                                        id,
+                                        now(CLOCK_REALTIME),
+                                        /* tpm2_device= */ NULL,
+                                        /* tpm2_signature_path= */ NULL,
+                                        getuid(),
+                                        &IOVEC_MAKE(data, size),
+                                        CREDENTIAL_ANY_SCOPE,
+                                        &plaintext);
                 if (r < 0)
                         return r;
 
